@@ -1,17 +1,26 @@
 # DatacampProject
-Which NYC schools have the best math results?
+best_math_schools = schools[schools["average_math"] >= 0.8 * 800]
+best_math_schools=best_math_schools[["school_name","average_math"]].sort_values("average_math",ascending=False)
+print(best_math_schools)
 
-The best math results are at least 80% of the *maximum possible score of 800* for math.
-Save your results in a pandas DataFrame called best_math_schools, including "school_name" and "average_math" columns, sorted by "average_math" in descending order.
-What are the top 10 performing schools based on the combined SAT scores?
+schools["total_SAT"]=schools["average_math"]+schools["average_reading"]+schools["average_writing"]
+top_10_schools=schools[["school_name","total_SAT"]].sort_values("total_SAT",ascending=False).head(10)
+print(top_10_schools)
 
-Save your results as a pandas DataFrame called top_10_schools containing the "school_name" and a new column named "total_SAT", with results ordered by "total_SAT" in descending order.
-Which single borough has the largest standard deviation in the combined SAT score?
+# Calculate the standard deviation of total_SAT for each borough
+borough_stats = schools.groupby("borough").agg(
+    num_schools=("school_name", "size"),
+    average_SAT=("total_SAT", "mean"),
+    std_SAT=("total_SAT", "std")
+).reset_index()
 
-Save your results as a pandas DataFrame called largest_std_dev.
-The DataFrame should contain one row, with:
-"borough" - the name of the NYC borough with the largest standard deviation of "total_SAT".
-"num_schools" - the number of schools in the borough.
-"average_SAT" - the mean of "total_SAT".
-"std_SAT" - the standard deviation of "total_SAT".
-Round all numeric values to two decimal places.
+# Find the borough with the largest standard deviation
+largest_std_dev = borough_stats.loc[borough_stats["std_SAT"].idxmax()]
+
+# Round the numeric values to two decimal places
+largest_std_dev["average_SAT"] = round(largest_std_dev["average_SAT"], 2)
+largest_std_dev["std_SAT"] = round(largest_std_dev["std_SAT"], 2)
+
+# Convert the result to a DataFrame
+largest_std_dev = pd.DataFrame([largest_std_dev])
+print(largest_std_dev)
